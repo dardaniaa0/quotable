@@ -15,9 +15,14 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "next dev",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "node src/index.js",
+    "dev": "NODE_ENV=development nodemon src/index.js",
+    "start:dev": "npm run dev",
+    "lint": "./node_modules/.bin/eslint . --color && echo \"eslint: no lint errors\"",
+    "test": "jest --setupFiles dotenv/config --verbose",
+    "test:watch": "jest --setupFiles dotenv/config --watchAll --verbose",
+    "deploy:production": "heroku pipelines:promote -a quotable-api-staging",
+    "prepare": "husky install"
   },
   "dependencies": {
     "chalk": "^5.0.1",
@@ -30,10 +35,7 @@
     "mongodb": "^4.7.0",
     "mongoose": "^6.4.0",
     "query-string": "^7.1.1",
-    "shortid": "^2.2.15",
-    "next": "^13.1.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "shortid": "^2.2.15"
   },
   "devDependencies": {
     "@babel/core": "^7.18.5",
