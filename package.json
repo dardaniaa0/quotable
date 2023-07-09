@@ -5,12 +5,12 @@
   "author": "Luke Peavey",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/lukepeavey/quotable",
+  "homepage": "https://github.com/dardaniaa0/quotable",
   "repository": {
-    "url": "https://github.com/lukepeavey/quotable"
+    "url": "https://github.com/dardaniaa0/quotable"
   },
   "bugs": {
-    "url": "https://github.com/lukepeavey/quotable"
+    "url": "https://github.com/dardaniaa0/quotable"
   },
   "license": "MIT",
   "main": "dist/index.js",
