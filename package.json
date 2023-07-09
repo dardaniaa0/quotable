@@ -18,7 +18,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest --setupFiles dotenv/config --verbose",
+    "test:watch": "jest --setupFiles dotenv/config --watchAll --verbose",
+    "deploy:production": "heroku pipelines:promote -a quotable-api-staging",
+    "prepare": "husky install"
   },
   "dependencies": {
     "chalk": "^5.0.1",
