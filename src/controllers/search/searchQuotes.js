@@ -23,7 +23,7 @@ export default async function searchQuotes(req, res, next) {
   try {
     const { slop, debug, query: rawQuery = '' } = req.query
 
-    const defaultPath = ['content', 'tags']
+    const defaultPath = ['name']
     const { query, exactPhrase } = parseQuery(rawQuery, defaultPath)
     const { skip: $skip, limit: $limit, page } = getPaginationParams(req.query)
 
@@ -40,13 +40,13 @@ export default async function searchQuotes(req, res, next) {
       // Search for an exact phrase...
       // @see https://docs.atlas.mongodb.com/reference/atlas-search/phrase/
       $search = {
-        phrase: { query, path: 'content', slop: 2 },
+        phrase: { query, path: 'name', slop: 2 },
       }
     } else {
       // Otherwise, use the `queryString` operator
       // @see https://www.mongodb.com/docs/atlas/atlas-search/queryString/
       $search = {
-        queryString: { query, defaultPath: 'content' },
+        queryString: { query, defaultPath: 'name' },
       }
     }
 

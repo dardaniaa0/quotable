@@ -37,7 +37,7 @@ export function parseQuery(rawQuery, defaultFields) {
   const prefixedTerms = query.match(/(author)|(content)|(tags):/gi) || []
 
   // 2. Check for invalid prefixes
-  const supportedFields = ['content', 'author', 'tags']
+  const supportedFields = ['name']
   if (prefixedTerms.some(term => !supportedFields.includes(toLower(term)))) {
     error = `Query contains an invalid field prefix. Supported fields are ${supportedFields.join(
       ' | '
@@ -50,9 +50,9 @@ export function parseQuery(rawQuery, defaultFields) {
   }
 
   // Search both content and tags
-  if (query.includes('content:')) {
+  if (query.includes('name:')) {
     const keywords = /content:((\w+)|(\([\w ]+\)))/i
-    query = query.replace(keywords, (_, m) => `(content:${m} OR tags:${m} )`)
+    query = query.replace(keywords, (_, m) => `(name:${m} )`)
   }
 
   return { query, error }
@@ -67,8 +67,7 @@ export function parseQuery(rawQuery, defaultFields) {
  *     keywords. This will filter the collection of quotes using a full
  *     text search. The method will then return n random quotes matching
  *     the given query.
- * @param {string} [params.tags] List of tags separated by comma or pipe
- * @param {string} [params.authorSlug] One or more author slugs (pipe separated)
+ * @param {string} [params.gender] One or more author slugs (pipe separated)
  * @param {string} [params.minLength] minimum quote length in characters
  * @param {string} [params.maxLength] maximum quote length in characters
  */
@@ -77,16 +76,15 @@ export async function getRandomQuotes(params, next) {
     const {
       minLength,
       maxLength,
-      tags,
-      author,
-      authorId,
-      authorSlug,
+      name,
+      id,
+      gender,
       limit = 1,
       query: rawQuery = '',
       enableAdvancedQuery = true,
     } = params
 
-    const defaultFields = ['content', 'tags']
+    const defaultFields = ['name']
     const { query, error } = parseQuery(rawQuery, defaultFields)
 
     // $search query
@@ -116,7 +114,7 @@ export async function getRandomQuotes(params, next) {
         //   This will match quotes with an author name that includes "adams"
         //   AND content that matches the terms "freedom" or "justice"
         $search = {
-          queryString: { defaultPath: 'content', query },
+          queryString: { defaultPath: 'name', query },
         }
       } else {
         // Basic queries
@@ -136,30 +134,26 @@ export async function getRandomQuotes(params, next) {
       $match.length = getLengthFilter(minLength, maxLength)
     }
 
-    if (tags) {
-      $match.tags = getTagsFilter(tags)
-    }
-
-    if (authorId) {
+    if (id) {
       // @deprecated
       // Use the `author` param to filter by author `name` or `slug` instead
-      $match.authorId = { $in: authorId.split('|') }
+      $match.id = { $in: id.split('|') }
     }
 
-    if (author) {
-      if (/,/.test(author)) {
+    if (name) {
+      if (/,/.test(name)) {
         // If `author` is a comma-separated list, respond with an error
         const message = 'Multiple authors should be separated by a pipe.'
         return next(createError(400, message))
       }
       // Filter quotes by author slug.
-      $match.authorSlug = { $in: author.split('|').map(slug) }
+      $match.gender = { $in: name.split('|').map(gender) }
     }
 
-    if (authorSlug) {
+    if (gender) {
       // @deprecated
       // use `author` param instead
-      $match.authorSlug = { $in: author.split('|').map(slug) }
+      $match.gender = { $in: name.split('|').map(gender) }
     }
 
     const results = await Quotes.aggregate(
@@ -171,7 +165,7 @@ export async function getRandomQuotes(params, next) {
         // Select `n` random quotes from the results, where `n` = `limit`
         { $sample: { size } },
         // Remove hidden properties
-        { $project: { __v: 0, authorId: 0 } },
+        { $project: { __v: 0, id: 0 } },
       ])
     )
     return results

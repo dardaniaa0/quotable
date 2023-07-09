@@ -13,7 +13,7 @@ export default async function getAPIInfo(req, res, next) {
       return next(createError(404, 'The requested resource could not be found'))
     }
 
-    res.status(200).json(omit(result.toJSON(), '_id'))
+    res.status(200).json(omit(result.toJSON(), 'id'))
   } catch (error) {
     return next(error)
   }

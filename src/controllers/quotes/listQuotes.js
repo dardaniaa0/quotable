@@ -1,6 +1,5 @@
 import createError from 'http-errors'
 import Quotes from '../../models/Quotes.js'
-import getTagsFilter from '../utils/getTagsFilter.js'
 import getLengthFilter from '../utils/getLengthFilter.js'
 import getPaginationParams from '../utils/getPaginationParams.js'
 import getSortParams from '../utils/getSortParams.js'
@@ -10,8 +9,7 @@ import slug from '../utils/slug.js'
  * Get multiple quotes from the database.
  *
  * @param {Object} params
- * @param {string} [params.authorId] Filter results by authorId
- * @param {string} [params.tags] List of tags separated by comma or pipe
+ * @param {string} [params.id] Filter results by id
  * @param {string} [params.minLength] min length in characters
  * @param {string} [params.maxLength] max length in characters
  * @param {string} [params.sortBy] Field used to sort results
@@ -21,40 +19,35 @@ import slug from '../utils/slug.js'
  */
 export default async function listQuotes(req, res, next) {
   try {
-    const { author, authorId, tags, minLength, maxLength } = req.query
+    const { name, id, minLength, maxLength } = req.query
     const { limit, skip, page } = getPaginationParams(req.query)
     const { sortBy, sortOrder } = getSortParams(req.query, {
       default: { field: 'dateAdded', order: -1 },
       dateAdded: { field: 'dateAdded', order: -1 },
       dateModified: { field: 'dateModified', order: -1 },
-      author: { field: 'author', order: 1 },
-      content: { field: 'content', order: 1 },
+      name: { field: 'name', order: 1 },
       length: { field: 'length', order: -1 },
     })
 
     // Query filters
     const filter = {}
 
-    if (author) {
+    if (name) {
       // Filter by author `name` or `slug`
-      if (/,/.test(author)) {
+      if (/,/.test(name)) {
         // If `author` is a comma-separated list, respond with error.
         const message = 'Multiple authors should be separated by a pipe.'
         return next(createError(400, message))
       }
-      filter.authorSlug = author.split('|').map(slug)
-    } else if (authorId) {
+      filter.gender = name.split('|').map(slug)
+    } else if (id) {
       // @deprecated
-      // Use author `slug` instead of _id.
-      filter.authorId = authorId
+      // Use author `slug` instead of id.
+      filter.id = id
     }
 
     if (minLength || maxLength) {
       filter.length = getLengthFilter(minLength, maxLength)
-    }
-
-    if (tags) {
-      filter.tags = getTagsFilter(tags)
     }
 
     // Fetch paginated results
@@ -63,7 +56,7 @@ export default async function listQuotes(req, res, next) {
         .sort({ [sortBy]: sortOrder })
         .limit(limit)
         .skip(skip)
-        .select('-__v -authorId'),
+        .select('-__v -id'),
 
       Quotes.countDocuments(filter),
     ])

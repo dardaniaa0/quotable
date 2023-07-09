@@ -7,7 +7,7 @@ import Quotes from '../../models/Quotes.js'
 export default async function getQuoteById(req, res, next) {
   try {
     const { id } = req.params
-    const result = await Quotes.findById(id).select('-__v -authorId')
+    const result = await Quotes.findById(id).select('-__v -id')
 
     if (!result) {
       return next(createError(404, 'The requested resource could not be found'))

@@ -10,11 +10,9 @@ const options = {
 
 const InfoSchema = new Schema(
   {
-    _id: { type: String, default: shortid.generate },
+    id: { type: String, default: shortid.generate },
     count: {
       quotes: { type: Number },
-      authors: { type: Number },
-      tags: { type: Number },
     },
     version: { type: String },
   },
